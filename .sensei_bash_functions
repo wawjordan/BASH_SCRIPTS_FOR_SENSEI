@@ -1,5 +1,3 @@
-export MY_WSL_USER_FOLDER="/home/wajordan"
-export MY_WINDOWS_USER_FOLDER="/mnt/c/Users/wajordan"
 export DEFAULT_OUTPUT_FOLDER="$MY_WINDOWS_USER_FOLDER/Desktop/"
 export DEFAULT_HO_DEV_DEBUG="$MY_WSL_USER_FOLDER/SENSEI_DEV/HO-dev/build-debug"
 export DEFAULT_HO_DEV_RELEASE="$MY_WSL_USER_FOLDER/SENSEI_DEV/HO-dev/build-release"
