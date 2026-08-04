@@ -1,0 +1,383 @@
+export MY_WSL_USER_FOLDER="/home/wajordan"
+export MY_WINDOWS_USER_FOLDER="/mnt/c/Users/wajordan"
+export DEFAULT_OUTPUT_FOLDER="$MY_WINDOWS_USER_FOLDER/Desktop/"
+export DEFAULT_HO_DEV_DEBUG="$MY_WSL_USER_FOLDER/SENSEI_DEV/HO-dev/build-debug"
+export DEFAULT_HO_DEV_RELEASE="$MY_WSL_USER_FOLDER/SENSEI_DEV/HO-dev/build-release"
+export DEFAULT_BC_DEV_DEV_RELEASE_SERIAL="$MY_WSL_USER_FOLDER/SENSEI_DEV/BC-dev-dev/build-serial-release"
+export DEFAULT_BC_DEV_DEV_RELEASE_MPI="$MY_WSL_USER_FOLDER/SENSEI_DEV/BC-dev-dev/build-mpi-release"
+
+export DEFAULT_SENSEI_CMAKE_SERIAL_DEBUG_FLAGS="-DCMAKE_BUILD_TYPE=Debug -DDEBUG=ON -DCMAKE_Fortran_COMPILER=gfortran -DCMAKE_PREFIX_PATH=$CONDA_PREFIX"
+export DEFAULT_SENSEI_CMAKE_SERIAL_RELEASE_FLAGS="-DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=gfortran -DCMAKE_PREFIX_PATH=$CONDA_PREFIX"
+export DEFAULT_SENSEI_CMAKE_MPI_DEBUG_FLAGS="-DCMAKE_BUILD_TYPE=Debug -DDEBUG=ON -DMPI=ON -DCMAKE_Fortran_COMPILER=mpifort -DCMAKE_PREFIX_PATH=$CONDA_PREFIX"
+export DEFAULT_SENSEI_CMAKE_MPI_RELEASE_FLAGS="-DCMAKE_BUILD_TYPE=Debug -DMPI=ON -DCMAKE_Fortran_COMPILER=mpifort -DCMAKE_PREFIX_PATH=$CONDA_PREFIX"
+export DEFAULT_SENSEI_CMAKE_SERIAL_VPRT_DEBUG_FLAGS="-DCMAKE_BUILD_TYPE=Debug -DVPRT=ON -DDEBUG=ON -DCMAKE_Fortran_COMPILER=gfortran -DCMAKE_PREFIX_PATH=$CONDA_PREFIX"
+export DEFAULT_SENSEI_CMAKE_SERIAL_VPRT_RELEASE_FLAGS="-DCMAKE_BUILD_TYPE=Release -DVPRT=ON -DCMAKE_Fortran_COMPILER=gfortran -DCMAKE_PREFIX_PATH=$CONDA_PREFIX"
+export DEFAULT_SENSEI_CMAKE_MPI_VPRT_DEBUG_FLAGS="-DCMAKE_BUILD_TYPE=Debug -DVPRT=ON -DDEBUG=ON -DMPI=ON -DCMAKE_Fortran_COMPILER=mpifort -DCMAKE_PREFIX_PATH=$CONDA_PREFIX"
+export DEFAULT_SENSEI_CMAKE_MPI_VPRT_RELEASE_FLAGS="-DCMAKE_BUILD_TYPE=Debug -DVPRT=ON -DMPI=ON -DCMAKE_Fortran_COMPILER=mpifort -DCMAKE_PREFIX_PATH=$CONDA_PREFIX"
+
+function cmake_debug {
+  echo "cmake $DEFAULT_SENSEI_CMAKE_SERIAL_DEBUG_FLAGS ../"
+  # cmake -DCMAKE_BUILD_TYPE=Debug -DDEBUG=ON -DCMAKE_Fortran_COMPILER=gfortran -DCMAKE_PREFIX_PATH=$CONDA_PREFIX ../
+  cmake $DEFAULT_SENSEI_CMAKE_SERIAL_DEBUG_FLAGS ../
+}
+
+function cmake_release {
+  echo "cmake $DEFAULT_SENSEI_CMAKE_SERIAL_RELEASE_FLAGS ../"
+  # cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_Fortran_COMPILER=gfortran -DCMAKE_PREFIX_PATH=$CONDA_PREFIX ../
+  cmake $DEFAULT_SENSEI_CMAKE_SERIAL_RELEASE_FLAGS ../
+}
+
+function cmake_mpi_debug {
+  echo "cmake $DEFAULT_SENSEI_CMAKE_MPI_DEBUG_FLAGS ../"
+  # cmake -DCMAKE_BUILD_TYPE=Debug -DDEBUG=ON -DMPI=ON -DCMAKE_Fortran_COMPILER=mpifort -DCMAKE_PREFIX_PATH=$CONDA_PREFIX ../
+  cmake $DEFAULT_SENSEI_CMAKE_MPI_DEBUG_FLAGS ../
+}
+
+function cmake_mpi_release {
+  echo "cmake $DEFAULT_SENSEI_CMAKE_MPI_RELEASE_FLAGS ../"
+  # cmake -DCMAKE_BUILD_TYPE=Release -DMPI=ON -DCMAKE_Fortran_COMPILER=mpifort -DCMAKE_PREFIX_PATH=$CONDA_PREFIX ../
+  cmake $DEFAULT_SENSEI_CMAKE_MPI_RELEASE_FLAGS ../
+}
+
+function cmake_vprt_debug {
+  echo "cmake $DEFAULT_SENSEI_CMAKE_SERIAL_VPRT_DEBUG_FLAGS ../"
+  # cmake -DCMAKE_BUILD_TYPE=Debug -DDEBUG=ON -DVPRT=ON -DCMAKE_Fortran_COMPILER=gfortran -DCMAKE_PREFIX_PATH=$CONDA_PREFIX ../
+  cmake $DEFAULT_SENSEI_CMAKE_SERIAL_VPRT_DEBUG_FLAGS ../
+}
+
+function cmake_vprt_release {
+  echo "cmake $DEFAULT_SENSEI_CMAKE_SERIAL_VPRT_RELEASE_FLAGS ../"
+  # cmake -DCMAKE_BUILD_TYPE=Release -DVPRT=ON -DCMAKE_Fortran_COMPILER=gfortran -DCMAKE_PREFIX_PATH=$CONDA_PREFIX ../
+  cmake $DEFAULT_SENSEI_CMAKE_SERIAL_VPRT_RELEASE_FLAGS ../
+}
+
+function cmake_vprt_mpi_debug {
+  echo "cmake $DEFAULT_SENSEI_CMAKE_MPI_VPRT_DEBUG_FLAGS ../"
+  # cmake -DCMAKE_BUILD_TYPE=Debug -DDEBUG=ON -DVPRT=ON -DMPI=ON -DCMAKE_Fortran_COMPILER=mpifort -DCMAKE_PREFIX_PATH=$CONDA_PREFIX ../
+  cmake $DEFAULT_SENSEI_CMAKE_MPI_VPRT_DEBUG_FLAGS ../
+}
+
+function cmake_vprt_mpi_release {
+  echo "cmake $DEFAULT_SENSEI_CMAKE_MPI_VPRT_RELEASE_FLAGS ../"
+  # cmake -DCMAKE_BUILD_TYPE=Release -DVPRT=ON -DMPI=ON -DCMAKE_Fortran_COMPILER=mpifort -DCMAKE_PREFIX_PATH=$CONDA_PREFIX ../
+  cmake $DEFAULT_SENSEI_CMAKE_MPI_VPRT_RELEASE_FLAGS ../
+}
+
+function get_meta_data_path() {
+  local path_to_executable=$1
+  local build_dir=$(dirname "$(dirname "$(realpath "$path_to_executable")")")
+  local filename="metadata.log"
+  local metadata=$(realpath -m "$build_dir/$filename")
+  if [ -f "$metadata" ]; then
+    echo "$metadata"
+    return 0
+  else
+    echo "$metadata not found in $build_dir"
+    return 1
+  fi
+}
+
+function has_sensei_nml() {
+  if [ -f "sensei.nml" ]; then
+    return 0
+  else
+    echo "error: no sensei.nml in current directory"
+    return 1
+  fi
+}
+
+function ____pre_sensei() {
+  has_sensei_nml || return $?
+  local exec=$1
+  local metadata=$(get_meta_data_path "${exec}")
+  if [ !$? ]; then
+    echo "cp ${metadata} ."
+    cp "${metadata}" .
+  fi
+  return 0
+}
+
+function ____print_pid_info() {
+  local PID=$1
+  local NAME="name"
+  if ps -p $PID > /dev/null; then
+    printf "%s" $PID > pid.txt
+    printf "%s" " " >> pid.txt
+    NAME=$(ps -p $PID -o comm=)
+    printf "%s" $NAME >> pid.txt
+    printf "%s" " " >> pid.txt
+    printf "%(%s)T" -1 >> pid.txt
+  fi
+}
+
+function SENSEI_HO_dev-debug() {
+  local exec=$DEFAULT_HO_DEV_DEBUG/bin/SENSEI
+  ____pre_sensei $exec || return $?
+  ${exec} 2>&1 | tee log_$(date +"%Y-%m-%d_%H:%M%S").txt
+}
+
+function SENSEI_HO_dev-release() {
+  local exec=$DEFAULT_HO_DEV_RELEASE/bin/SENSEI
+  ____pre_sensei $exec || return $?
+  ${exec} 2>&1 | tee log_$(date +"%Y-%m-%d_%H:%M%S").txt
+}
+
+function SENSEI_HO_dev-release_background() {
+  local exec=$DEFAULT_HO_DEV_RELEASE/bin/SENSEI
+  local PID=0
+  ____pre_sensei $exec || return $?
+  ${exec} >> log_$(date +"%Y-%m-%d_%H:%M%S").txt 2>&1 &
+  PID=$!
+  ____print_pid_info $PID
+}
+
+function freeze_limiters() {
+  touch freeze_mean_limiter.dat
+  touch freeze_turb_limiter.dat
+}
+
+function unfreeze_limiters() {
+  touch unfreeze_mean_limiter.dat
+  touch unfreeze_turb_limiter.dat
+}
+
+function cfl_set_SENSEI() {
+  local mean_cfl=$1
+  local turb_cfl=${2:-"${mean_cfl}"}
+  printf "%s\n" "constant" > cfl.dat
+  # first argument is ramp end iter
+  # second argurment is ramp end cfl
+  printf "%s %s" ${mean_cfl} ${turb_cfl} >> cfl.dat
+}
+
+function cfl_ramp_SENSEI() {
+  printf "%s\n" "ramp" > cfl.dat
+  # first argument is ramp end iter
+  # second argurment is ramp end cfl
+  printf "%s %s" $1 $2 >> cfl.dat
+}
+
+function cfl_ser_SENSEI() {
+  printf "%s\n" "SER" > cfl.dat
+}
+
+function cfl_expur_SENSEI() {
+  printf "%s\n" "EXPur" > cfl.dat
+}
+
+function cfl_rdm_SENSEI() {
+  printf "%s\n" "RDM" > cfl.dat
+}
+
+function cfl_mrdm_SENSEI() {
+  printf "%s\n" "mRDM" > cfl.dat
+}
+
+function clean_SENSEI() {
+  local patterns=(
+    "nohup.out"
+    "*.dat"
+    "*.txt"
+    "*.rst"
+    "*.tar"
+    "sensei.nml.*"
+    "sensei_turb.nml.*"
+    "*.deexact*"
+    "fort.0"
+    "*-coarse.bc"
+    "*-agglom.bc"
+    "*-coarse.grd"
+    "*-fine.grd"
+    "*.hdf5.out"
+    )
+  local verbose=${1:-"v"}
+  local file_pat=${1:-"*/"}
+  local v=0
+  local pattern=""
+  local DIR=$( pwd )/
+  local file="file"
+  local yn="n"
+  case "$verbose" in
+    v|V )
+      v=1
+      ;;
+    * )
+      v=0
+      ;;
+  esac
+  read -p "Continue (y/n)?" yn
+  case "$yn" in 
+    y|Y )
+      for pattern in "${patterns[@]}" ; do
+        for file in ${DIR}${pattern} ; do
+          if [ -f "${file}" ]; then
+            if [ ${v} -eq 1 ]; then
+              echo "removing ${file}"
+            fi
+          rm -f "${file}"
+          fi
+        done
+      done
+    ;;
+    n|N ) echo "cancelling operation";;
+    * ) echo "invalid response";;
+  esac
+}
+
+function clean_restart_SENSEI() {
+  local patterns=(
+    "nohup.out"
+    "*.dat"
+    "*.txt"
+    "*.tar"
+    "sensei.nml.*"
+    "sensei_turb.nml.*"
+    "*.deexact*"
+    "fort.0"
+    "*-coarse.bc"
+    "*-agglom.bc"
+    "*-coarse.grd"
+    "*-fine.grd"
+    "*.hdf5.out"
+    )
+  local verbose=${1:-"v"}
+  local file_pat=${1:-"*/"}
+  local v=0
+  local pattern=""
+  local DIR=$( pwd )/
+  local file="file"
+  local yn="n"
+  case "$verbose" in
+    v|V )
+      v=1
+      ;;
+    * )
+      v=0
+      ;;
+  esac
+  read -p "Continue (y/n)?" yn
+  case "$yn" in 
+    y|Y )
+      for pattern in "${patterns[@]}" ; do
+        for file in ${DIR}${pattern} ; do
+          if [ -f "${file}" ]; then
+            if [ ${v} -eq 1 ]; then
+              echo "removing ${file}"
+            fi
+          rm -f "${file}"
+          fi
+        done
+      done
+    ;;
+    n|N ) echo "cancelling operation";;
+    * ) echo "invalid response";;
+  esac
+}
+
+function copy_nml_to_subfolders() {
+local namelist="sensei.nml"
+local file_pat=${1:-"*/"}
+local d=""
+local DIR=$( pwd )/
+for d in ${DIR}${file_pat} ; do
+  cp ${DIR}${FILE} $d
+done
+}
+
+function run_SENSEI_cases() {
+local namelist="sensei.nml"
+local pid_file="pid.txt"
+local file_pat=${1:-"*/"}
+local d=""
+local DIR=$( pwd )/
+for d in ${DIR}${file_pat} ; do
+  cp ${DIR}${FILE} $d
+  cd $d
+  yes | clean_SENSEI "n"
+  SENSEI_HO_dev-release_background
+  cd ${DIR}
+done
+}
+
+function stop_SENSEI_cases() {
+  local DIR=$( pwd )/
+  local file="pid.txt"
+  local PID=0
+  local NAME="name1"
+  local NAME2="name2"
+  local RUN_TIME=0
+  local START_TIME=0
+  local CURR_TIME=0
+  local DIFF=0
+  local d=""
+  local yn="n"
+  while true; do
+    read -p "Stop all cases located in ${DIR}? (y/n): " yn
+    case $yn in
+        [Yy]* ) 
+            for d in ${DIR}*/ ; do
+              cd $d
+              if [ -f "$file" ]; then
+                echo "$file found"
+                echo "($d$file)"
+                read -r PID NAME START_TIME < "$file"
+                echo "process ID: $PID"
+                echo "command name: $NAME"
+                echo "start time: $START_TIME"
+                if ps -p $PID > /dev/null; then
+                  echo "process $PID is running"
+                  NAME2=$(ps -p $PID -o comm=)
+                  if [ "$NAME2"="$NAME" ]; then
+                    echo "process name $NAME2 matches saved process name $NAME"
+                    CURR_TIME=$(printf "%(%s)T\n" -1)
+                    DIFF=$((CURR_TIME-START_TIME))
+                    echo "calculated run time is $DIFF"
+                    RUN_TIME=$(ps -p $PID -o etimes=)
+                    RUN_TIME=$((RUN_TIME+1))
+                    echo "run time is $RUN_TIME"
+                    if [ "$DIFF" -le "$RUN_TIME" ]; then
+                      echo "run time matches - killing process"
+                      kill $PID
+                    else
+                      echo "run time does not match - skipping"
+                    fi
+                  else
+                    echo "process name $NAME2 does not match saved process name $NAME"
+                  fi
+                else
+                  echo "process $PID is not running"
+                fi
+              else
+                echo "$file not found"
+                echo "($d$file)"
+              fi
+              cd ${DIR}
+            done
+            break
+            ;;
+        [Nn]* ) 
+            echo "Operation canceled."
+            exit 0
+            ;;
+        * ) 
+            echo "Please answer yes or no."
+            ;;
+    esac
+done
+}
+
+function copy_SENSEI_results () {
+  local PAT=$1
+  local DEST=${2:-"${DEFAULT_OUTPUT_FOLDER}"}
+  local DIR=$( pwd )/
+  local DATE_STR=$(date +"%Y-%m-%d_%H.%M.%S")
+  local FOLDER=""
+  local d=""
+  FOLDER="${DIR%"${DIR##*[!/]}"}" # extglob-free multi-trailing-/ trim
+  FOLDER="${FOLDER##*/}"          # remove everything before the last /
+  FOLDER=${FOLDER:-/}             # correct for DIR=/ case
+  mkdir -p ${DEST}${FOLDER}
+  for d in ${DIR}${PAT}*/ ; do
+    cp -r $d ${DEST}${FOLDER}
+  done
+}
