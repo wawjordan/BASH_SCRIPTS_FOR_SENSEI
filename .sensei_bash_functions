@@ -374,6 +374,7 @@ function copy_SENSEI_results () {
   FOLDER="${DIR%"${DIR##*[!/]}"}" # extglob-free multi-trailing-/ trim
   FOLDER="${FOLDER##*/}"          # remove everything before the last /
   FOLDER=${FOLDER:-/}             # correct for DIR=/ case
+  FOLDER="${FOLDER}_${DATE_STR}"  # append time stamp
   mkdir -p ${DEST}${FOLDER}
   for d in ${DIR}${PAT}*/ ; do
     cp -r $d ${DEST}${FOLDER}
