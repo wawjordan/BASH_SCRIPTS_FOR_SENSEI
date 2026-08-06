@@ -278,7 +278,7 @@ local file_pat=${1:-"*/"}
 local d=""
 local DIR=$( pwd )/
 for d in ${DIR}${file_pat} ; do
-  cp ${DIR}${FILE} $d
+  cp ${DIR}${namelist} $d
 done
 }
 
