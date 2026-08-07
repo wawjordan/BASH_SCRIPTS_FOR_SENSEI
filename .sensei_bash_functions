@@ -282,6 +282,24 @@ for d in ${DIR}${file_pat} ; do
 done
 }
 
+function clean_all() {
+local file_pat=${1:-"*/"}
+local d=""
+local DIR=$( pwd )/
+read -p "Continue (y/n)?" yn
+case "$yn" in 
+  y|Y )
+  for d in ${DIR}${file_pat} ; do
+    cd $d
+    yes | clean_SENSEI "n"
+    cd ${DIR}
+  done
+  ;;
+  n|N ) echo "cancelling operation";;
+  * ) echo "invalid response";;
+esac
+}
+
 function run_SENSEI_cases() {
 local namelist="sensei.nml"
 local pid_file="pid.txt"
