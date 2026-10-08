@@ -300,6 +300,27 @@ case "$yn" in
 esac
 }
 
+function clean_all_up1() {
+  # runs clean_all in all subdirectories of depth 1
+  # so effectively depth 2 clean_SENSEI
+  # can work out a general solution later
+local d=""
+local DIR=$( pwd )
+read -p "Continue (y/n)?" yn
+case "$yn" in 
+  y|Y )
+  for d in ${DIR}/*/ ; do
+    cd $d
+    echo "cleaning $d"
+    yes | clean_all "$@"
+    cd ${DIR}
+  done
+  ;;
+  n|N ) echo "cancelling operation";;
+  * ) echo "invalid response";;
+esac
+}
+
 function run_SENSEI_cases() {
 local namelist="sensei.nml"
 local pid_file="pid.txt"
